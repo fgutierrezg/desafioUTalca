@@ -26,4 +26,5 @@ class UsersTableSeeder extends Seeder
             ]);
         }
     }
+    
 }
