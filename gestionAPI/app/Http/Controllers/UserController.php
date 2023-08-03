@@ -26,7 +26,16 @@ class UserController extends Controller
      * Listado de usuarios
      * @OA\Get (
      *     path="/api/users/list",
+     *     security={{"bearerAuth": {}}},
      *     tags={"Usuarios"},
+     *      @OA\Parameter(
+     *         name="token",
+     *         in="query",
+     *         description="Bearer {access-token}",
+     *         @OA\Schema(
+     *         type="bearerAuth"
+     *         ) 
+     *      ),
      *     @OA\Response(
      *         response=200,
      *         description="OK",
@@ -70,7 +79,7 @@ class UserController extends Controller
     {
 
         $users = Http::get("https://64c811bda1fe0128fbd59c04.mockapi.io/api/v1/datausers");
-        
+
         return $users->json();
     }
 
@@ -92,11 +101,16 @@ class UserController extends Controller
      *                      @OA\Property(
      *                          property="email",
      *                          type="string"
-     *                      )
+     *                      ),
+     *      *                      @OA\Property(
+     *                          property="password",
+     *                          type="string"
+     *                      ),
      *                 ),
      *                 example={
      *                     "name":"FranciscoTest",
-     *                     "email":"fgutierrez@example.cl"
+     *                     "email":"fgutierrez@example.cl",
+     *                     "password":"pass",
      *                }
      *             )
      *         )
@@ -124,6 +138,11 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        $this->validate($request,[
+            'name' => 'required|max:255',
+            'email' => 'required|email|max:255',
+            'password' => 'required|min:4',
+        ]);
 
         $dataToCreate = [
             'name' => $request->name,
@@ -142,13 +161,13 @@ class UserController extends Controller
 
         if ($response->successful()) {
             // La solicitud fue exitosa 
-            return response()->json(['message' => 'Usuario creado exitosamente','token' => $token], 201);
+            return response()->json(['message' => 'Usuario creado exitosamente', 'token' => $token], 201);
 
         } else {
             // La solicitud no fue exitosa 
             $statusCode = $response->status();
             $errorMessage = $response->body();
-            return response()->json(['message' => $errorMessage,'status' => $statusCode], 500);
+            return response()->json(['message' => $errorMessage, 'status' => $statusCode], 500);
         }
 
     }
@@ -187,7 +206,6 @@ class UserController extends Controller
      * )
      */public function show($id)
     {
-
         $users = Http::get("https://64c811bda1fe0128fbd59c04.mockapi.io/api/v1/datausers/{$id}");
         return $users->json();
     }
@@ -203,6 +221,14 @@ class UserController extends Controller
      *         required=true,
      *         @OA\Schema(type="string")
      *     ),
+     *     @OA\Parameter(
+     *         name="token",
+     *         in="query",
+     *         description="Bearer {access-token}",
+     *         @OA\Schema(
+     *         type="bearerAuth"
+     *         ) 
+     *      ),
      *     @OA\RequestBody(
      *         @OA\MediaType(
      *             mediaType="application/json",
@@ -249,7 +275,11 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
 
-        
+        $this->validate($request,[
+            'name' => 'max:255',
+            'email' => 'email|max:255',
+        ]);
+
         $dataToUpdate = [
             'name' => $request->name,
             'email' => $request->email,
@@ -265,7 +295,7 @@ class UserController extends Controller
             // La solicitud no fue exitosa 
             $statusCode = $response->status();
             $errorMessage = $response->body();
-            return response()->json(['message' => $errorMessage,'status' => $statusCode], 500);
+            return response()->json(['message' => $errorMessage, 'status' => $statusCode], 500);
         }
 
     }
@@ -281,6 +311,14 @@ class UserController extends Controller
      *         required=true,
      *         @OA\Schema(type="string")
      *     ),
+     *     @OA\Parameter(
+     *         name="token",
+     *         in="query",
+     *         description="Bearer {access-token}",
+     *         @OA\Schema(
+     *         type="bearerAuth"
+     *         ) 
+     *      ),
      *     @OA\Response(
      *         response=204,
      *         description="NO CONTENT"
@@ -295,7 +333,7 @@ class UserController extends Controller
     {
         $response = Http::delete("https://64c811bda1fe0128fbd59c04.mockapi.io/api/v1/datausers/{$id}");
 
-        
+
         if ($response->successful()) {
             // La solicitud fue exitosa 
             return response()->json(['message' => 'Eliminacion exitosa'], 200);
@@ -303,7 +341,7 @@ class UserController extends Controller
             // La solicitud no fue exitosa 
             $statusCode = $response->status();
             $errorMessage = $response->body();
-            return response()->json(['message' => $errorMessage,'status' => $statusCode], 500);
+            return response()->json(['message' => $errorMessage, 'status' => $statusCode], 500);
         }
 
     }

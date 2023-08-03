@@ -13,32 +13,45 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('guest')->except('logout');
+    }
 
     public function login(Request $request)
     {
+        $this->validate($request,[
+            'email' => 'required',
+            'password' => 'required',
+        ]);
         $credentials = $request->only('email', 'password');
 
-        //if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials)) {
 
-        try {
-            if (!$token = JWTAuth::attempt($credentials))
+            try {
+                if (!$token = JWTAuth::attempt($credentials))
+                    return response()->json([
+                        'error' => 'Credenciales invalidas'
+                    ], 400);
+
+            } catch (JWTException $e) {
                 return response()->json([
-                    'error' => 'Credenciales invalidas'
-                ], 400);
+                    'error' => 'Token no creado'
+                ], 500);
+            }
 
-        } catch (JWTException $e) {
-            return response()->json([
-                'error' => 'Token no creado'
-            ], 500);
+            $userData = Auth::user();
+            $name = $userData->userData['name'];
+            $email= $userData->userData['email'];
+
+
+            return view('auth.dashboard', compact('name','email','token'));
+
         }
 
-        //$user = Auth::user();
-        //$token = JWTAuth::fromUser($user);
-
-        return response()->json(compact('token'));
-
-        //}
-
+        return response()->json([
+            'error' => 'Credenciales invalidas'
+        ], 400);
 
 
     }
@@ -73,6 +86,15 @@ class AuthController extends Controller
 
     public function showLoginForm()
     {
+        if (auth()->check()) {
+
+            $userData = Auth::user();
+            $name = $userData->userData['name'];
+            $email= $userData->userData['email'];
+
+            return view('auth.dashboard', compact('name','email','token'));
+        }
+
         return view('auth.login');
     }
 

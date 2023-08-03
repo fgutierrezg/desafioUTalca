@@ -38,7 +38,6 @@ Route::middleware('jwt.verify')->group(function () {
     
     Route::delete('/users/delete/{id}', [UserController::class, 'destroy']);
     Route::put('/users/me/{id}', [UserController::class, 'update']);
-    Route::get('/documentation', [SwaggerController::class, 'api']);
     Route::get('/users/list', [UserController::class, 'index']);
-    
+
 });

@@ -18,6 +18,16 @@
                 ],
                 "summary": "Listado de usuarios",
                 "operationId": "95fe90deb322e1e219b901a9330a0129",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "description": "Bearer {access-token}",
+                        "schema": {
+                            "type": "bearerAuth"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -59,7 +69,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/users/new": {
@@ -81,6 +96,9 @@
                                             },
                                             "email": {
                                                 "type": "string"
+                                            },
+                                            "password": {
+                                                "type": "string"
                                             }
                                         },
                                         "type": "object"
@@ -89,7 +107,8 @@
                                 "type": "object",
                                 "example": {
                                     "name": "FranciscoTest",
-                                    "email": "fgutierrez@example.cl"
+                                    "email": "fgutierrez@example.cl",
+                                    "password": "pass"
                                 }
                             }
                         }
@@ -235,6 +254,14 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "description": "Bearer {access-token}",
+                        "schema": {
+                            "type": "bearerAuth"
+                        }
                     }
                 ],
                 "requestBody": {
@@ -334,6 +361,14 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "description": "Bearer {access-token}",
+                        "schema": {
+                            "type": "bearerAuth"
+                        }
                     }
                 ],
                 "responses": {
@@ -345,6 +380,26 @@
                     }
                 }
             }
+        }
+    },
+    "security": {
+        "petstore_auth": {
+            "type": "oauth2",
+            "description": "Petstore auth",
+            "in": "header",
+            "scheme": "https",
+            "flows": {
+                "password": {
+                    "authorizationUrl": "/oauth/authorize",
+                    "tokenUrl": "/oauth/token",
+                    "scopes": []
+                }
+            }
+        },
+        "bearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT"
         }
     }
 }

@@ -29,7 +29,7 @@
                         aria-labelledby="nav-contact-tab">
 
 
-                        <form method="POST" action="{{ url('api/login') }}">
+                        <form action="{{ url('api/login') }}" method="POST">
                             @csrf
                             <div class="form-group ">
                                 <label for="exampleInputEmail1"><strong>Email</strong></label>
@@ -43,8 +43,6 @@
                                     aria-describedby="emailHelp" placeholder="Ingrese contraseña">
 
                             </div>
-                     
-
                             <button type="submit" class="btn btn-primary btn-block">
                                 Iniciar sesión
                             </button>
