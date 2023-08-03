@@ -13,6 +13,6 @@
 # 7. Ejecutar "php artisan jwt:secret" para regenerar interfaz de swager
 # 8. Ejecutar "php artisan serve" para correr el servidor local"
 # 9. Una vez corriendo el server, diriguirse a la url http://127.0.0.1:8000/login (reemplozar puerto 8000 con el que corresponda)
-# 10. Iniciar sesión con correo "fgutierrez@example.cl" y contraseña "pass
+# 10. Iniciar sesión con correo "fgutierrez@example.cl" y contraseña "pass"
 # Felicidades, ya entraste!
 #
