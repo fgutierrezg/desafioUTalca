@@ -14,7 +14,7 @@ return [
     */
 
     'defaults' => [
-        'guard' => 'web',
+        'guard' => 'mockapi',
         'passwords' => 'users',
     ],
 
@@ -40,7 +40,18 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'api' => [
+            'driver' => 'jwt',
+            'provider' => 'mockapi',
+        ],
+
+        'mockapi' => [
+            'driver' => 'session',
+            'provider' => 'mockapi',
+        ]
+        
     ],
+
 
     /*
     |--------------------------------------------------------------------------
@@ -59,17 +70,26 @@ return [
     |
     */
 
+
     'providers' => [
+
         'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
         ],
+
+        'mockapi' => [
+            'driver' => 'mockapi',
+            'model' => App\Auth\ExternalUser::class,
+        ]
 
         // 'users' => [
         //     'driver' => 'database',
         //     'table' => 'users',
         // ],
     ],
+
+    
 
     /*
     |--------------------------------------------------------------------------

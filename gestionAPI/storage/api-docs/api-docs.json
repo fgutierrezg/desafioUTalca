@@ -11,13 +11,13 @@
         }
     ],
     "paths": {
-        "/api/users": {
+        "/api/users/list": {
             "get": {
                 "tags": [
                     "Usuarios"
                 ],
                 "summary": "Listado de usuarios",
-                "operationId": "c457726701591d1183b53aa71fc13441",
+                "operationId": "95fe90deb322e1e219b901a9330a0129",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -35,11 +35,11 @@
                                                     },
                                                     "name": {
                                                         "type": "string",
-                                                        "example": "Francisco G"
+                                                        "example": "FranciscoTest G"
                                                     },
                                                     "email": {
                                                         "type": "string",
-                                                        "example": "franciscog@test.cl"
+                                                        "example": "FranciscoTestg@test.cl"
                                                     },
                                                     "created_at": {
                                                         "type": "string",
@@ -60,13 +60,15 @@
                         }
                     }
                 }
-            },
+            }
+        },
+        "/api/users/new": {
             "post": {
                 "tags": [
                     "Usuarios"
                 ],
-                "summary": "Registrar la información de un usuario",
-                "operationId": "592819a0265360b2014512d6dbfaf0e7",
+                "summary": "Crear un nuevo usuario",
+                "operationId": "96489e56b45671f98ff819d3fbd6c47a",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -86,8 +88,8 @@
                                 },
                                 "type": "object",
                                 "example": {
-                                    "nombres": "Francisco",
-                                    "apellidos": "fgutierrez@example.cl"
+                                    "name": "FranciscoTest",
+                                    "email": "fgutierrez@example.cl"
                                 }
                             }
                         }
@@ -106,7 +108,7 @@
                                         },
                                         "name": {
                                             "type": "string",
-                                            "example": "Francisco G"
+                                            "example": "FranciscoTest G"
                                         },
                                         "email": {
                                             "type": "string",
@@ -149,16 +151,16 @@
                 }
             }
         },
-        "/api/users/{user} ": {
+        "/api/users/{id} ": {
             "get": {
                 "tags": [
                     "Usuarios"
                 ],
                 "summary": "Mostrar la información de un usuario",
-                "operationId": "dff5b23305a2c0e73c8c960b9f1f2aba",
+                "operationId": "5ae89a271926d8a3a29fb28ca3b9e44d",
                 "parameters": [
                     {
-                        "name": "user",
+                        "name": "id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -179,11 +181,11 @@
                                         },
                                         "name": {
                                             "type": "string",
-                                            "example": "Aderson Felix"
+                                            "example": "FranciscoTest G."
                                         },
                                         "email": {
                                             "type": "string",
-                                            "example": "aliya26@example.org"
+                                            "example": "fgutierrez@example.org"
                                         },
                                         "created_at": {
                                             "type": "string",
@@ -207,7 +209,7 @@
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "No query results for model [App\\\\Models\\\\User] #id"
+                                            "example": "ID sin resultados"
                                         }
                                     },
                                     "type": "object"
@@ -218,16 +220,16 @@
                 }
             }
         },
-        "/api/users/{user}": {
+        "/api/users/me/{id}": {
             "put": {
                 "tags": [
                     "Usuarios"
                 ],
                 "summary": "Actualizar la información de un usuario",
-                "operationId": "e29fc231c7937ab09483d35e6e3d1214",
+                "operationId": "3fda11e0e70376fb0798133fc9b39f53",
                 "parameters": [
                     {
-                        "name": "user",
+                        "name": "id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -254,8 +256,8 @@
                                 },
                                 "type": "object",
                                 "example": {
-                                    "nombres": "Francisco G Editado",
-                                    "apellidos": "fgutierrez@test.cl"
+                                    "name": "FranciscoTest G Editado",
+                                    "email": "fgutierrez@test.cl"
                                 }
                             }
                         }
@@ -272,13 +274,13 @@
                                             "type": "number",
                                             "example": 1
                                         },
-                                        "nombres": {
+                                        "name": {
                                             "type": "string",
-                                            "example": "Francisco G Editado"
+                                            "example": "FranciscoTest G Editado"
                                         },
-                                        "apellidos": {
+                                        "email": {
                                             "type": "string",
-                                            "example": "Francisco G Editado"
+                                            "example": "FranciscoTest G Editado"
                                         },
                                         "created_at": {
                                             "type": "string",
@@ -315,16 +317,18 @@
                         }
                     }
                 }
-            },
+            }
+        },
+        "/api/users/delete/{id}": {
             "delete": {
                 "tags": [
                     "Usuarios"
                 ],
-                "summary": "Eliminar la información de un usuario",
-                "operationId": "e0f9a385a1d6788b99e519bd98cf7239",
+                "summary": "Eliminar usuario y su información",
+                "operationId": "9715e31688901372e9b3959ff93d0422",
                 "parameters": [
                     {
-                        "name": "user",
+                        "name": "id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -337,20 +341,7 @@
                         "description": "NO CONTENT"
                     },
                     "404": {
-                        "description": "NOT FOUND",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "No se pudo realizar correctamente la operación"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "NOT FOUND"
                     }
                 }
             }

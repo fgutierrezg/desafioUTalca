@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Auth\ExternalUser;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 /**
  * @OA\Info(
@@ -19,11 +22,10 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
 
-
     /**
      * Listado de usuarios
      * @OA\Get (
-     *     path="/api/users",
+     *     path="/api/users/list",
      *     tags={"Usuarios"},
      *     @OA\Response(
      *         response=200,
@@ -42,12 +44,12 @@ class UserController extends Controller
      *                     @OA\Property(
      *                         property="name",
      *                         type="string",
-     *                         example="Francisco G"
+     *                         example="FranciscoTest G"
      *                     ),
      *                     @OA\Property(
      *                         property="email",
      *                         type="string",
-     *                         example="franciscog@test.cl"
+     *                         example="FranciscoTestg@test.cl"
      *                     ),
      *                     @OA\Property(
      *                         property="created_at",
@@ -66,14 +68,16 @@ class UserController extends Controller
      * )
      */public function index()
     {
-        $users = User::all();
-        return response()->json($users);
+
+        $users = Http::get("https://64c811bda1fe0128fbd59c04.mockapi.io/api/v1/datausers");
+        
+        return $users->json();
     }
 
     /**
-     * Registrar la información de un usuario
+     * Crear un nuevo usuario
      * @OA\Post (
-     *     path="/api/users",
+     *     path="/api/users/new",
      *     tags={"Usuarios"},
      *     @OA\RequestBody(
      *         @OA\MediaType(
@@ -91,8 +95,8 @@ class UserController extends Controller
      *                      )
      *                 ),
      *                 example={
-     *                     "nombres":"Francisco",
-     *                     "apellidos":"fgutierrez@example.cl"
+     *                     "name":"FranciscoTest",
+     *                     "email":"fgutierrez@example.cl"
      *                }
      *             )
      *         )
@@ -102,7 +106,7 @@ class UserController extends Controller
      *          description="CREATED",
      *          @OA\JsonContent(
      *              @OA\Property(property="id", type="number", example=1),
-     *              @OA\Property(property="name", type="string", example="Francisco G"),
+     *              @OA\Property(property="name", type="string", example="FranciscoTest G"),
      *              @OA\Property(property="email", type="string", example="fgutierrez@example.cl"),
      *              @OA\Property(property="created_at", type="string", example="2023-02-23T00:09:16.000000Z"),
      *              @OA\Property(property="updated_at", type="string", example="2023-02-23T12:33:45.000000Z")
@@ -120,21 +124,33 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|min:8',
-        ]);
 
-        $user = new User([
+        $dataToCreate = [
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-        ]);
+            'created_at' => (new \DateTime())->format('Y-m-d\TH:i:s.u\Z'),
+            'updated_at' => (new \DateTime())->format('Y-m-d\TH:i:s.u\Z')
+        ];
 
-        $user->save();
+        $user = new ExternalUser($dataToCreate);
 
-        return response()->json(['message' => 'Usuario creado exitosamente'], 201);
+        $token = JWTAuth::fromUser($user);
+        $dataToCreate['token'] = $token;
+
+        $response = Http::post("https://64c811bda1fe0128fbd59c04.mockapi.io/api/v1/datausers", $dataToCreate);
+
+        if ($response->successful()) {
+            // La solicitud fue exitosa 
+            return response()->json(['message' => 'Usuario creado exitosamente','token' => $token], 201);
+
+        } else {
+            // La solicitud no fue exitosa 
+            $statusCode = $response->status();
+            $errorMessage = $response->body();
+            return response()->json(['message' => $errorMessage,'status' => $statusCode], 500);
+        }
+
     }
 
 
@@ -142,11 +158,11 @@ class UserController extends Controller
     /**
      * Mostrar la información de un usuario
      * @OA\Get (
-     *     path="/api/users/{user} ",
+     *     path="/api/users/{id} ",
      *     tags={"Usuarios"},
      *     @OA\Parameter(
      *         in="path",
-     *         name="user",
+     *         name="id",
      *         required=true,
      *         @OA\Schema(type="string")
      *     ),
@@ -155,8 +171,8 @@ class UserController extends Controller
      *         description="OK",
      *         @OA\JsonContent(
      *              @OA\Property(property="id", type="number", example=1),
-     *              @OA\Property(property="name", type="string", example="Aderson Felix"),
-     *              @OA\Property(property="email", type="string", example="aliya26@example.org"),
+     *              @OA\Property(property="name", type="string", example="FranciscoTest G."),
+     *              @OA\Property(property="email", type="string", example="fgutierrez@example.org"),
      *              @OA\Property(property="created_at", type="string", example="2023-02-23T00:09:16.000000Z"),
      *              @OA\Property(property="updated_at", type="string", example="2023-02-23T12:33:45.000000Z")
      *         )
@@ -165,24 +181,25 @@ class UserController extends Controller
      *          response=404,
      *          description="NOT FOUND",
      *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="No query results for model [App\\Models\\User] #id"),
+     *              @OA\Property(property="message", type="string", example="ID sin resultados"),
      *          )
      *      )
      * )
      */public function show($id)
     {
-        $user = User::findOrFail($id);
-        return response()->json($user);
+
+        $users = Http::get("https://64c811bda1fe0128fbd59c04.mockapi.io/api/v1/datausers/{$id}");
+        return $users->json();
     }
 
     /**
      * Actualizar la información de un usuario
      * @OA\Put (
-     *     path="/api/users/{user}",
+     *     path="/api/users/me/{id}",
      *     tags={"Usuarios"},
      *     @OA\Parameter(
      *         in="path",
-     *         name="user",
+     *         name="id",
      *         required=true,
      *         @OA\Schema(type="string")
      *     ),
@@ -202,8 +219,8 @@ class UserController extends Controller
      *                      )
      *                 ),
      *                 example={
-     *                     "nombres": "Francisco G Editado",
-     *                     "apellidos": "fgutierrez@test.cl"
+     *                     "name": "FranciscoTest G Editado",
+     *                     "email": "fgutierrez@test.cl"
      *                }
      *             )
      *         )
@@ -213,8 +230,8 @@ class UserController extends Controller
      *          description="success",
      *          @OA\JsonContent(
      *              @OA\Property(property="id", type="number", example=1),
-     *              @OA\Property(property="nombres", type="string", example="Francisco G Editado"),
-     *              @OA\Property(property="apellidos", type="string", example="Francisco G Editado"),
+     *              @OA\Property(property="name", type="string", example="FranciscoTest G Editado"),
+     *              @OA\Property(property="email", type="string", example="FranciscoTest G Editado"),
      *              @OA\Property(property="created_at", type="string", example="2023-02-23T00:09:16.000000Z"),
      *              @OA\Property(property="updated_at", type="string", example="2023-02-23T12:33:45.000000Z")
      *          )
@@ -231,27 +248,36 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|unique:users,email,' . $id,
-        ]);
 
-        $user = User::findOrFail($id);
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->save();
+        
+        $dataToUpdate = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'updated_at' => (new \DateTime())->format('Y-m-d\TH:i:s.u\Z')
+        ];
 
-        return response()->json(['message' => 'Usuario actualizado exitosamente'], 200);
+        $response = Http::put("https://64c811bda1fe0128fbd59c04.mockapi.io/api/v1/datausers/{$id}", $dataToUpdate);
+
+        if ($response->successful()) {
+            // La solicitud fue exitosa 
+            return response()->json(['message' => 'Usuario actualizado exitosamente'], 200);
+        } else {
+            // La solicitud no fue exitosa 
+            $statusCode = $response->status();
+            $errorMessage = $response->body();
+            return response()->json(['message' => $errorMessage,'status' => $statusCode], 500);
+        }
+
     }
 
     /**
-     * Eliminar la información de un usuario
+     * Eliminar usuario y su información
      * @OA\Delete (
-     *     path="/api/users/{user}",
+     *     path="/api/users/delete/{id}",
      *     tags={"Usuarios"},
      *     @OA\Parameter(
      *         in="path",
-     *         name="user",
+     *         name="id",
      *         required=true,
      *         @OA\Schema(type="string")
      *     ),
@@ -261,18 +287,24 @@ class UserController extends Controller
      *     ),
      *      @OA\Response(
      *          response=404,
-     *          description="NOT FOUND",
-     *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="No se pudo realizar correctamente la operación"),
-     *          )
+     *          description="NOT FOUND"
      *      )
      * )
      */
     public function destroy($id)
     {
-        $user = User::findOrFail($id);
-        $user->delete();
+        $response = Http::delete("https://64c811bda1fe0128fbd59c04.mockapi.io/api/v1/datausers/{$id}");
 
-        return response()->json(['message' => 'Usuario eliminado exitosamente'], 200);
+        
+        if ($response->successful()) {
+            // La solicitud fue exitosa 
+            return response()->json(['message' => 'Eliminacion exitosa'], 200);
+        } else {
+            // La solicitud no fue exitosa 
+            $statusCode = $response->status();
+            $errorMessage = $response->body();
+            return response()->json(['message' => $errorMessage,'status' => $statusCode], 500);
+        }
+
     }
 }
