@@ -6,8 +6,8 @@
 #
 # 1. Clonar el repositorio en su ordenador local
 # 2. Descargar e instalar composer desde su web oficial https://getcomposer.org/download/
-# 3. Ejecutar al directorio del proyecto (cd gestionAPI)
-# 4. Ejecutar en linea de comandos Composer Install
+# 3. Acceder al directorio del proyecto (cd gestionAPI)
+# 4. Ejecutar en linea de comandos "Composer Install" para obtener todas las dependencias
 # 5. Renombrar archivo ".env.example" por ".env"
 # 6. Ejecutar "php artisan jwt:secret" para regenerar el JWT secret en Laravel
 # 7. Ejecutar "php artisan jwt:secret" para regenerar interfaz de swager
